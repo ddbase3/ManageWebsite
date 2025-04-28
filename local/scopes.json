@@ -1,7 +1,7 @@
 [
 	{
-		"scope": "website",
-		"name": "Website",
+		"scope": "web",
+		"name": "Web",
 		"order": 10,
 		"active": 1
 	}
