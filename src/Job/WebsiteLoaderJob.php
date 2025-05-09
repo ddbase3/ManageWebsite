@@ -89,6 +89,9 @@ private function getWebsites(): string {
                 'meta_generator' => null,
                 'last_access' => date('c'),
                 'load_time_ms' => null,
+                'final_url' => null,
+                'content_length' => null,
+                'ssl_info' => null,
                 'has_robots_txt' => null,
                 'has_favicon_ico' => null
             ];
@@ -100,11 +103,28 @@ private function getWebsites(): string {
                 CURLOPT_RETURNTRANSFER => true,
                 CURLOPT_FOLLOWLOCATION => true,
                 CURLOPT_TIMEOUT => 5,
-                CURLOPT_USERAGENT => 'WebsiteLoaderJob/1.0'
+                CURLOPT_USERAGENT => 'WebsiteLoaderJob/1.0',
+                CURLOPT_HEADER => false,
+                CURLOPT_SSL_VERIFYPEER => false,
+                CURLOPT_SSL_VERIFYHOST => false
             ]);
             $html = curl_exec($curl);
             $info['load_time_ms'] = round((microtime(true) - $start) * 1000);
             $info['http_status'] = curl_getinfo($curl, CURLINFO_HTTP_CODE);
+            $info['final_url'] = curl_getinfo($curl, CURLINFO_EFFECTIVE_URL);
+            $info['content_length'] = curl_getinfo($curl, CURLINFO_CONTENT_LENGTH_DOWNLOAD);
+
+            // SSL-Info (wenn HTTPS)
+            if (stripos($info['final_url'], 'https://') === 0) {
+                $cert = curl_getinfo($curl, CURLINFO_CERTINFO);
+                if ($cert && is_array($cert) && isset($cert[0])) {
+                    $info['ssl_info'] = [
+                        'subject' => $cert[0]['Subject'] ?? null,
+                        'issuer' => $cert[0]['Issuer'] ?? null
+                    ];
+                }
+            }
+
             curl_close($curl);
 
             if ($html !== false && $info['http_status'] >= 200 && $info['http_status'] < 400) {
@@ -119,11 +139,9 @@ private function getWebsites(): string {
                 }
             }
 
-            // robots.txt prüfen
-            $info['has_robots_txt'] = $this->checkUrlExists(rtrim($url, '/') . '/robots.txt');
-
-            // favicon.ico prüfen
-            $info['has_favicon_ico'] = $this->checkUrlExists(rtrim($url, '/') . '/favicon.ico');
+            $baseUrl = rtrim($url, '/');
+            $info['has_robots_txt'] = $this->checkUrlExists($baseUrl . '/robots.txt');
+            $info['has_favicon_ico'] = $this->checkUrlExists($baseUrl . '/favicon.ico');
 
             $websites[] = $info;
         }
@@ -140,7 +158,9 @@ private function checkUrlExists(string $url): bool {
         CURLOPT_FOLLOWLOCATION => true,
         CURLOPT_TIMEOUT => 3,
         CURLOPT_USERAGENT => 'WebsiteLoaderJob/1.0',
-        CURLOPT_RETURNTRANSFER => true
+        CURLOPT_RETURNTRANSFER => true,
+        CURLOPT_SSL_VERIFYPEER => false,
+        CURLOPT_SSL_VERIFYHOST => false
     ]);
     curl_exec($curl);
     $httpCode = curl_getinfo($curl, CURLINFO_HTTP_CODE);
