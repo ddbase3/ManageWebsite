@@ -87,6 +87,8 @@ private function getWebsites(): string {
                 'http_status' => null,
                 'title' => null,
                 'meta_generator' => null,
+                'meta_description' => null,
+                'meta_keywords' => null,
                 'last_access' => date('c'),
                 'load_time_ms' => null,
                 'final_url' => null,
@@ -136,6 +138,16 @@ private function getWebsites(): string {
                 // Meta Generator extrahieren
                 if (preg_match('/<meta[^>]+name=["\']?generator["\']?[^>]*content=["\']([^"\']+)["\']/i', $html, $matches)) {
                     $info['meta_generator'] = trim($matches[1]);
+                }
+
+                // Meta Description extrahieren
+                if (preg_match('/<meta[^>]+name=["\']?description["\']?[^>]*content=["\']([^"\']+)["\']/i', $html, $matches)) {
+                    $info['meta_description'] = trim($matches[1]);
+                }
+
+                // Meta Keywords extrahieren
+                if (preg_match('/<meta[^>]+name=["\']?keywords["\']?[^>]*content=["\']([^"\']+)["\']/i', $html, $matches)) {
+                    $info['meta_keywords'] = trim($matches[1]);
                 }
             }
 
