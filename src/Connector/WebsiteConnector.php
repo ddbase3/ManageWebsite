@@ -78,14 +78,14 @@ class WebsiteConnector implements IOutput {
         $totalPages = ceil($total / $perPage);
         $page = min(max(1, intval($_GET['page'] ?? 1)), $totalPages);
         $offset = ($page - 1) * $perPage;
-        $pagedSites = array_slice($websites, $offset, $perPage);
+        $pagedData = array_slice($websites, $offset, $perPage);
 
         return json_encode([
             'total' => $total,
             'page' => $page,
             'perPage' => $perPage,
             'totalPages' => $totalPages,
-            'websites' => $pagedSites
+            'data' => $pagedData
         ]);
     }
 
