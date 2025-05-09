@@ -1,0 +1,151 @@
+<?php
+
+namespace ManageWebsite\Job;
+
+use Base3\Worker\Api\IJob;
+use Base3\Configuration\Api\IConfiguration;
+use Base3\Api\ICheck;
+
+class WebsiteLoaderJob implements IJob, ICheck {
+
+	private $configuration;
+	private $nextRun = 6 * 3600;
+
+	public function __construct(IConfiguration $configuration) {
+		$this->configuration = $configuration;
+	}
+
+	// Implementation of IBase
+
+	public function getName(): string {
+		return 'websiteloaderjob';
+	}
+
+	// Implementation of IJob
+
+	public function isActive() {
+		return true;
+	}
+
+	public function getPriority() {
+		return 1;
+	}
+
+	public function go() {
+		$dataDir = $this->getDataDir();
+		if (!strlen($dataDir)) return 'data dir undefined';
+
+		$nextRunFile = $this->getNextRunFile();
+		$now = time();
+		$nextRun = is_file($nextRunFile) ? intval(file_get_contents($nextRunFile)) : 0;
+		if ($now < $nextRun) return 'skipped (next run: ' . date('c', $nextRun) . ')';
+		file_put_contents($nextRunFile, strval($now + $this->nextRun));
+
+		$result = $this->getWebsites();
+		return $result;
+	}
+
+	// Implementation of ICheck
+
+	public function checkDependencies() {
+		return array(
+			'managewebsite_dir_defined' => strlen($this->getDataDir()) ? 'Ok' : 'managewebsite dir not defined',
+			'managewebsite_dir_writable' => is_writable($this->getDataDir()) ? 'Ok' : 'managewebsite dir not writable'
+		);
+	}
+
+	// Private methods
+
+	private function getDataDir() {
+		$directories = $this->configuration->get('directories');
+		return isset($directories['data'])
+			? $directories['data'] . DIRECTORY_SEPARATOR . 'managewebsite' . DIRECTORY_SEPARATOR
+			: '';
+	}
+
+	private function getNextRunFile(): string {
+		return $this->getDataDir() . 'nextrun';
+	}
+
+private function getWebsites(): string {
+    $dataDir = $this->getDataDir();
+    if (!strlen($dataDir)) return 'data dir undefined';
+
+    $configFile = $dataDir . 'managewebsite-config.ini';
+    if (!is_file($configFile)) return 'config file missing';
+
+    $configuration = parse_ini_file($configFile, true);
+    $websites = [];
+
+    foreach ($configuration as $group => $entries) {
+        if (!isset($entries['url'])) continue;
+        $urls = is_array($entries['url']) ? $entries['url'] : [$entries['url']];
+        foreach ($urls as $url) {
+            $info = [
+                'group' => $group,
+                'url' => $url,
+                'http_status' => null,
+                'title' => null,
+                'meta_generator' => null,
+                'last_access' => date('c'),
+                'load_time_ms' => null,
+                'has_robots_txt' => null,
+                'has_favicon_ico' => null
+            ];
+
+            // HTML abrufen
+            $start = microtime(true);
+            $curl = curl_init($url);
+            curl_setopt_array($curl, [
+                CURLOPT_RETURNTRANSFER => true,
+                CURLOPT_FOLLOWLOCATION => true,
+                CURLOPT_TIMEOUT => 5,
+                CURLOPT_USERAGENT => 'WebsiteLoaderJob/1.0'
+            ]);
+            $html = curl_exec($curl);
+            $info['load_time_ms'] = round((microtime(true) - $start) * 1000);
+            $info['http_status'] = curl_getinfo($curl, CURLINFO_HTTP_CODE);
+            curl_close($curl);
+
+            if ($html !== false && $info['http_status'] >= 200 && $info['http_status'] < 400) {
+                // Titel extrahieren
+                if (preg_match('/<title>(.*?)<\/title>/is', $html, $matches)) {
+                    $info['title'] = trim($matches[1]);
+                }
+
+                // Meta Generator extrahieren
+                if (preg_match('/<meta[^>]+name=["\']?generator["\']?[^>]*content=["\']([^"\']+)["\']/i', $html, $matches)) {
+                    $info['meta_generator'] = trim($matches[1]);
+                }
+            }
+
+            // robots.txt prüfen
+            $info['has_robots_txt'] = $this->checkUrlExists(rtrim($url, '/') . '/robots.txt');
+
+            // favicon.ico prüfen
+            $info['has_favicon_ico'] = $this->checkUrlExists(rtrim($url, '/') . '/favicon.ico');
+
+            $websites[] = $info;
+        }
+    }
+
+    file_put_contents($dataDir . 'websites.json', json_encode($websites, JSON_PRETTY_PRINT));
+    return 'done';
+}
+
+private function checkUrlExists(string $url): bool {
+    $curl = curl_init($url);
+    curl_setopt_array($curl, [
+        CURLOPT_NOBODY => true,
+        CURLOPT_FOLLOWLOCATION => true,
+        CURLOPT_TIMEOUT => 3,
+        CURLOPT_USERAGENT => 'WebsiteLoaderJob/1.0',
+        CURLOPT_RETURNTRANSFER => true
+    ]);
+    curl_exec($curl);
+    $httpCode = curl_getinfo($curl, CURLINFO_HTTP_CODE);
+    curl_close($curl);
+    return $httpCode >= 200 && $httpCode < 400;
+}
+
+}
