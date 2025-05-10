@@ -3,6 +3,7 @@
 namespace ManageWebsite;
 
 use Base3\Api\IContainer;
+use Base3\Configuration\Api\IConfiguration;
 use Base3Manager\Plugin\AbstractPlugin;
 
 class ManageWebsitePlugin extends AbstractPlugin {
@@ -11,8 +12,11 @@ class ManageWebsitePlugin extends AbstractPlugin {
 
 	public function init() {
 
+		$configuration = $this->container->get(IConfiguration::class);
+
 		$this->container
 			->set($this->getName(), $this, IContainer::SHARED)
+			->set('websiteloaderjob', new \ManageWebsite\Job\WebsiteLoaderJob($configuration), IContainer::SHARED)
 			;
 	}
 
@@ -23,5 +27,4 @@ class ManageWebsitePlugin extends AbstractPlugin {
 			"Check" => "Ok"
 		);
 	}
-
 }

@@ -159,8 +159,20 @@ private function getWebsites(): string {
         }
     }
 
-    file_put_contents($dataDir . 'websites.json', json_encode($websites, JSON_PRETTY_PRINT));
+    $websitesUtf8 = $this->convertToUtf8($websites);
+
+    file_put_contents($dataDir . 'websites.json', json_encode($websitesUtf8, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE));
     return 'done';
+}
+
+private function convertToUtf8($data) {
+    if (is_array($data)) {
+        return array_map([$this, 'convertToUtf8'], $data);
+    } elseif (is_string($data)) {
+        // return utf8_encode($data);
+        return mb_convert_encoding($data, 'UTF-8', 'auto');
+    }
+    return $data;
 }
 
 private function checkUrlExists(string $url): bool {

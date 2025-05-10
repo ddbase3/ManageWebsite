@@ -10,7 +10,7 @@ class WebsiteConnector implements IOutput {
 
     private $configuration;
     private $accesscontrol;
-    private $defaultPerPage = 10;
+    private $defaultPageSize = 10;
 
     public function __construct(
         IAccesscontrol $accesscontrol,
@@ -57,6 +57,11 @@ class WebsiteConnector implements IOutput {
         $sort = $_GET['sort'] ?? 'name';
         $direction = strtolower($_GET['direction'] ?? 'asc');
         usort($websites, function ($a, $b) use ($sort, $direction) {
+            if ($sort == 'load_time_ms') {
+                return $direction === 'desc'
+                    ? $b[$sort] <=> $a[$sort]
+                    : $a[$sort] <=> $b[$sort];
+            }
             $aVal = strtolower($a[$sort] ?? '');
             $bVal = strtolower($b[$sort] ?? '');
             return ($direction === 'desc' ? -1 : 1) * strcmp($aVal, $bVal);
@@ -74,16 +79,16 @@ class WebsiteConnector implements IOutput {
 
         // Paging
         $total = count($websites);
-        $perPage = $this->defaultPerPage;
-        $totalPages = ceil($total / $perPage);
+        $pageSize = $_GET['pageSize'] ?? $this->defaultPageSize;
+        $totalPages = ceil($total / $pageSize);
         $page = min(max(1, intval($_GET['page'] ?? 1)), $totalPages);
-        $offset = ($page - 1) * $perPage;
-        $pagedData = array_slice($websites, $offset, $perPage);
+        $offset = ($page - 1) * $pageSize;
+        $pagedData = array_slice($websites, $offset, $pageSize);
 
         return json_encode([
             'total' => $total,
             'page' => $page,
-            'perPage' => $perPage,
+            'pageSize' => $pageSize,
             'totalPages' => $totalPages,
             'data' => $pagedData
         ]);
