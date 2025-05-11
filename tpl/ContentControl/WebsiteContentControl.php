@@ -73,7 +73,7 @@
 	};
 
 	$('#websiteDatatable').jqueryDataTable({
-		url: '?name=websiteconnector&out=json',
+		dataSource: '?name=websiteconnector&out=json',
 		columns: columns,
 		sortColumn: 'url',
 		sortDirection: 'asc',
@@ -87,6 +87,7 @@
 			columnSelector: 'header.left'
 		},
 		renderers: {
+			pager: $.fn.jqueryDataTable.renderers.compactPager,
 			info: infoRenderer,
 			filterCell: filterRenderer,
 			valueCell: valueRenderer,

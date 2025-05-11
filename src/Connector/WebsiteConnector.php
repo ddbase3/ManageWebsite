@@ -8,17 +8,12 @@ use Base3\Accesscontrol\Api\IAccesscontrol;
 
 class WebsiteConnector implements IOutput {
 
-    private $configuration;
-    private $accesscontrol;
     private $defaultPageSize = 10;
 
     public function __construct(
-        IAccesscontrol $accesscontrol,
-        IConfiguration $configuration
-    ) {
-        $this->accesscontrol = $accesscontrol;
-        $this->configuration = $configuration;
-    }
+        private IAccesscontrol $accesscontrol,
+        private IConfiguration $configuration
+    ) {}
 
     // Implementation of IBase
 
