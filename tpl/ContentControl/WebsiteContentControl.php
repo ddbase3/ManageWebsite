@@ -10,8 +10,8 @@
 		{ key: 'url', label: 'URL' },
 		{ key: 'http_status', label: 'HTTP Status' },
 		{ key: 'title', label: 'Title' },
-		{ key: 'meta_description', label: 'Meta Description' },
-		{ key: 'last_access', label: 'Letzter Zugriff' },
+		{ key: 'meta_description', label: 'Meta Description', visible: false },
+		{ key: 'last_access', label: 'Letzter Zugriff', visible: false },
 		{ key: 'load_time_ms', label: 'Ladezeit' },
 		{ key: 'has_robots_txt', label: 'robots.txt' },
 		{ key: 'has_favicon_ico', label: 'favicon.ico', options: [
