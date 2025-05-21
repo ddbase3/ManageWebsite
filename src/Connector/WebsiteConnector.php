@@ -3,6 +3,7 @@
 namespace ManageWebsite\Connector;
 
 use Base3\Api\IOutput;
+use Base3\Api\IRequest;
 use Base3\Configuration\Api\IConfiguration;
 use Base3\Accesscontrol\Api\IAccesscontrol;
 
@@ -12,7 +13,8 @@ class WebsiteConnector implements IOutput {
 
     public function __construct(
         private IAccesscontrol $accesscontrol,
-        private IConfiguration $configuration
+        private IConfiguration $configuration,
+        private IRequest $request
     ) {}
 
     // Implementation of IBase
@@ -49,8 +51,8 @@ class WebsiteConnector implements IOutput {
         });
 
         // Sortierung
-        $sort = $_GET['sort'] ?? 'name';
-        $direction = strtolower($_GET['direction'] ?? 'asc');
+        $sort = $this->request->get('sort', 'name');
+        $direction = strtolower($this->request->get('direction', 'asc'));
         usort($websites, function ($a, $b) use ($sort, $direction) {
             if ($sort == 'load_time_ms') {
                 return $direction === 'desc'
@@ -63,7 +65,7 @@ class WebsiteConnector implements IOutput {
         });
 
         // Filter
-        $filters = $_GET['filter'] ?? [];
+        $filters = $this->request->get('filter', []);
         $websites = array_filter($websites, function ($site) use ($filters) {
             foreach ($filters as $key => $val) {
                 if (!isset($site[$key])) return false;
@@ -74,9 +76,9 @@ class WebsiteConnector implements IOutput {
 
         // Paging
         $total = count($websites);
-        $pageSize = $_GET['pageSize'] ?? $this->defaultPageSize;
+        $pageSize = $this->request->get('pageSize', $this->defaultPageSize);
         $totalPages = ceil($total / $pageSize);
-        $page = min(max(1, intval($_GET['page'] ?? 1)), $totalPages);
+        $page = min(max(1, intval($this->request->get('page', 1))), $totalPages);
         $offset = ($page - 1) * $pageSize;
         $pagedData = array_slice($websites, $offset, $pageSize);
 
