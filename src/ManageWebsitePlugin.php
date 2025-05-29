@@ -13,7 +13,7 @@ class ManageWebsitePlugin extends AbstractPlugin {
 	public function init() {
 
 		$this->container
-			->set($this->getName(), $this, IContainer::SHARED)
+			->set(self::getName(), $this, IContainer::SHARED)
 			->set('websiteloaderjob', new \ManageWebsite\Job\WebsiteLoaderJob($this->container->get(IConfiguration::class)), IContainer::SHARED)
 			;
 	}
