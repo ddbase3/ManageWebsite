@@ -25,7 +25,7 @@ class WebsiteConnector implements IOutput {
 
     // Implementation of IOutput
 
-    public function getOutput($out = "html") {
+    public function getOutput(string $out = 'html', bool $final = false): string {
         if ($out !== "json") return null;
         if (!$this->accesscontrol->getUserId()) return null;
 
@@ -91,8 +91,7 @@ class WebsiteConnector implements IOutput {
         ]);
     }
 
-    public function getHelp() {
+    public function getHelp(): string {
         return "Liefert eine Liste gecrawlter Websites als JSON (aus websites.json). Optional: ?sort=name&direction=asc&page=1&filter[key]=value";
     }
 }
-
