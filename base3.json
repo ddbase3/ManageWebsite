@@ -1,0 +1,12 @@
+{
+	"manifestVersion": 1,
+	"name": "ManageWebsite",
+	"namespace": "Base3\\ManageWebsite",
+	"version": "0.0.0",
+	"description": "ManageWebsite provides website administration views. It adds website controls through Base3Manager. Application and host integration remain separate owners.",
+	"license": "GPL-3.0",
+	"dependencies": {
+		"Base3Manager": ">=0.0.0",
+		"CoreFoundation": ">=4.10.0"
+	}
+}

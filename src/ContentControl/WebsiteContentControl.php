@@ -1,12 +1,27 @@
 <?php declare(strict_types=1);
 
-namespace ManageWebsite\ContentControl;
+/***********************************************************************
+ * This file is part of ManageWebsite for BASE3 Framework.
+ *
+ * ManageWebsite provides website administration views.
+ * It adds website controls through Base3Manager.
+ * Application and host integration remain separate owners.
+ *
+ * Developed by Daniel Dahme
+ * Licensed under GPL-3.0
+ * https://www.gnu.org/licenses/gpl-3.0.en.html
+ *
+ * https://base3.de
+ ***********************************************************************/
 
-use Base3\Api\IAssetResolver;
-use Base3\Api\IMvcView;
-use Base3\LinkTarget\Api\ILinkTargetService;
-use Base3Manager\Service\Base3Manager;
-use Base3Manager\ContentControl\AbstractContentControl;
+
+namespace Base3\ManageWebsite\ContentControl;
+
+use Base3\CoreFoundation\Api\IAssetResolver;
+use Base3\CoreFoundation\Api\IMvcView;
+use Base3\CoreFoundation\LinkTarget\Api\ILinkTargetService;
+use Base3\Base3Manager\Service\Base3Manager;
+use Base3\Base3Manager\ContentControl\AbstractContentControl;
 
 class WebsiteContentControl extends AbstractContentControl {
 

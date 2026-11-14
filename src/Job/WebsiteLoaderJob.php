@@ -1,10 +1,24 @@
-<?php
+<?php declare(strict_types=1);
 
-namespace ManageWebsite\Job;
+/***********************************************************************
+ * This file is part of ManageWebsite for BASE3 Framework.
+ *
+ * ManageWebsite provides website administration views.
+ * It adds website controls through Base3Manager.
+ * Application and host integration remain separate owners.
+ *
+ * Developed by Daniel Dahme
+ * Licensed under GPL-3.0
+ * https://www.gnu.org/licenses/gpl-3.0.en.html
+ *
+ * https://base3.de
+ ***********************************************************************/
 
-use Base3\Worker\Api\IJob;
-use Base3\Configuration\Api\IConfiguration;
-use Base3\Api\ICheck;
+namespace Base3\ManageWebsite\Job;
+
+use Base3\CoreFoundation\Worker\Api\IJob;
+use Base3\CoreFoundation\Configuration\Api\IConfiguration;
+use Base3\CoreFoundation\Api\ICheck;
 
 class WebsiteLoaderJob implements IJob, ICheck {
 

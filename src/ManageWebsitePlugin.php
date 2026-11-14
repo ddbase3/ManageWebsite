@@ -1,10 +1,25 @@
 <?php declare(strict_types=1);
 
-namespace ManageWebsite;
+/***********************************************************************
+ * This file is part of ManageWebsite for BASE3 Framework.
+ *
+ * ManageWebsite provides website administration views.
+ * It adds website controls through Base3Manager.
+ * Application and host integration remain separate owners.
+ *
+ * Developed by Daniel Dahme
+ * Licensed under GPL-3.0
+ * https://www.gnu.org/licenses/gpl-3.0.en.html
+ *
+ * https://base3.de
+ ***********************************************************************/
 
-use Base3\Api\IContainer;
-use Base3\Configuration\Api\IConfiguration;
-use Base3Manager\Plugin\AbstractPlugin;
+
+namespace Base3\ManageWebsite;
+
+use Base3\CoreFoundation\Api\IContainer;
+use Base3\CoreFoundation\Configuration\Api\IConfiguration;
+use Base3\Base3Manager\Plugin\AbstractPlugin;
 
 class ManageWebsitePlugin extends AbstractPlugin {
 
@@ -14,7 +29,7 @@ class ManageWebsitePlugin extends AbstractPlugin {
 
 		$this->container
 			->set(self::getName(), $this, IContainer::SHARED)
-			->set('websiteloaderjob', new \ManageWebsite\Job\WebsiteLoaderJob($this->container->get(IConfiguration::class)), IContainer::SHARED)
+			->set('websiteloaderjob', new \Base3\ManageWebsite\Job\WebsiteLoaderJob($this->container->get(IConfiguration::class)), IContainer::SHARED)
 			;
 	}
 
